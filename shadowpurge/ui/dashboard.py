@@ -178,7 +178,7 @@ async def run_search_scan(
 
     if not discovered_platforms:
         console.print("[yellow]No accounts found for this target.[/yellow]")
-        return
+        return results
 
     # Display results table
     table = Table(

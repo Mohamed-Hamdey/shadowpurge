@@ -164,8 +164,10 @@ class SearchEngine:
                 or "challenge" in content.lower()
                 or "anomaly" in content.lower()
             ):
-                # Return empty content instead of raising error - let parser handle empty results
-                return ""
+                # Raise NetworkError to trigger fallback to next engine
+                raise NetworkError(
+                    f"{self.config.name} returned CAPTCHA challenge (202)"
+                )
             return response.text
         elif response.status_code != 200:
             raise NetworkError(f"{self.config.name} returned {response.status_code}")
@@ -219,6 +221,82 @@ class DuckDuckGoEngine(SearchEngine):
             "AppleWebKit/537.36 (KHTML, like Gecko) "
             "Chrome/120.0.0.0 Safari/537.36"
         )
+
+    def _parse_results(self, html: str, query: str) -> List[SearchResult]:
+        """Parse DuckDuckGo HTML results."""
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(html, "html.parser")
+        results = []
+
+        # Try primary selector
+        for result_elem in soup.select(self.config.result_selector):
+            try:
+                # Extract link
+                link_elem = result_elem.select_one("a.result__snippet, a.result__url, a")
+                if not link_elem or not link_elem.get("href"):
+                    continue
+
+                url_str = link_elem["href"]
+                # Clean DuckDuckGo redirect URLs
+                if url_str.startswith("//duckduckgo.com/l/?"):
+                    # Extract actual URL from redirect
+                    parsed = urllib.parse.urlparse("https:" + url_str)
+                    params = urllib.parse.parse_qs(parsed.query)
+                    if "uddg" in params:
+                        url_str = params["uddg"][0]
+
+                # Extract title
+                title_elem = result_elem.select_one(self.config.title_selector)
+                title = title_elem.get_text(strip=True) if title_elem else ""
+
+                # Extract snippet
+                snippet_elem = result_elem.select_one(self.config.snippet_selector)
+                snippet = snippet_elem.get_text(strip=True) if snippet_elem else ""
+
+                # Extract and normalize URL
+                extracted = ExtractedURL(url=url_str)
+                platform = self.platform_detector.detect(extracted)
+
+                results.append(SearchResult(
+                    url=extracted,
+                    platform=platform,
+                    title=title,
+                    snippet=snippet,
+                    source_engine="DuckDuckGo"
+                ))
+
+            except Exception:
+                continue
+
+        # Fallback: if no results found with primary selector, try extracting all links
+        if not results:
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(html, "html.parser")
+            for link in soup.find_all("a", href=True):
+                url_str = link.get("href")
+                if not url_str or not url_str.startswith("http"):
+                    continue
+
+                # Skip DuckDuckGo internal links
+                if "duckduckgo.com" in url_str:
+                    continue
+
+                title = link.get_text(strip=True)
+                snippet = ""
+
+                extracted = ExtractedURL(url=url_str)
+                platform = self.platform_detector.detect(extracted)
+
+                if platform:
+                    results.append(SearchResult(
+                        url=extracted,
+                        platform=platform,
+                        title=title,
+                        snippet=snippet,
+                        source_engine="DuckDuckGo"
+                    ))
+
+        return results
 
 
 class SerpAPIEngine(SearchEngine):
@@ -831,7 +909,13 @@ class SearchEngineManager:
         max_results: int = 100,
     ) -> List[SearchResult]:
         """Search across multiple engines and aggregate results."""
-        engines_to_use = engines or list(self.engines.keys())
+        # If engines specified, use only those; otherwise use fallback chain
+        if engines:
+            engines_to_use = [e for e in engines if e in self.engines]
+        else:
+            # Use fallback chain based on availability
+            engines_to_use = self._get_fallback_chain()
+
         all_results: List[SearchResult] = []
 
         for engine_name in engines_to_use:
@@ -848,8 +932,8 @@ class SearchEngineManager:
                     if len(all_results) >= max_results:
                         break
                     page_count += 1
-            except DiscoveryError:
-                # Log and continue with other engines
+            except (DiscoveryError, NetworkError, RateLimitError):
+                # Engine failed, continue to next in fallback chain
                 continue
 
         # Deduplicate by URL
@@ -861,6 +945,21 @@ class SearchEngineManager:
                 unique_results.append(result)
 
         return unique_results[:max_results]
+
+    def _get_fallback_chain(self) -> List[str]:
+        """Get fallback chain of engines, prioritizing those with API keys."""
+        # Priority order: API-based engines first (more reliable), then free ones
+        priority = [
+            "serpapi",      # Most reliable, paid
+            "google_cse",   # Good results, needs CX
+            "brave",        # 2000/month free
+            "mojeek",       # Free tier
+            "searxng",      # Public instances
+            "wiby",         # Classic web
+            "marginalia",   # Non-commercial
+            "duckduckgo",   # Last resort (often CAPTCHA)
+        ]
+        return [e for e in priority if e in self.engines]
 
     async def discover_profiles(
         self,

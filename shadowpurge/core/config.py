@@ -19,11 +19,15 @@ class SearchEngineConfig(BaseSettings):
 class SerpAPIConfig(SearchEngineConfig):
     """SerpAPI configuration."""
 
+    model_config = SettingsConfigDict(extra="allow")
+
     api_key: Optional[str] = Field(default=None, validation_alias="SERPAPI_KEY")
 
 
 class GoogleCSEConfig(SearchEngineConfig):
     """Google Custom Search Engine configuration."""
+
+    model_config = SettingsConfigDict(extra="allow")
 
     api_key: Optional[str] = Field(default=None, validation_alias="GOOGLE_CSE_KEY")
     cx: Optional[str] = Field(default=None, validation_alias="GOOGLE_CSE_CX")
@@ -32,11 +36,15 @@ class GoogleCSEConfig(SearchEngineConfig):
 class BingConfig(SearchEngineConfig):
     """Bing Web Search API configuration."""
 
+    model_config = SettingsConfigDict(extra="allow")
+
     api_key: Optional[str] = Field(default=None, validation_alias="BING_API_KEY")
 
 
 class BraveConfig(SearchEngineConfig):
     """Brave Search API configuration."""
+
+    model_config = SettingsConfigDict(extra="allow")
 
     api_key: Optional[str] = Field(default=None, validation_alias="BRAVE_API_KEY")
 
@@ -44,13 +52,15 @@ class BraveConfig(SearchEngineConfig):
 class MojeekConfig(SearchEngineConfig):
     """Mojeek Search API configuration."""
 
+    model_config = SettingsConfigDict(extra="allow")
+
     api_key: Optional[str] = Field(default=None, validation_alias="MOJEEK_API_KEY")
 
 
 class SearchConfig(BaseSettings):
     """Search configuration."""
 
-    model_config = SettingsConfigDict(env_prefix="SHADOWPURGE_SEARCH_")
+    model_config = SettingsConfigDict(env_prefix="SHADOWPURGE_SEARCH_", env_nested_delimiter="__", extra="allow")
 
     engines: List[str] = Field(
         default=["duckduckgo"], description="Enabled search engines"
