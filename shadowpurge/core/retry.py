@@ -14,7 +14,7 @@ def retry(
     delay: float = 1.0,
     backoff: float = 2.0,
     exceptions: Tuple[Type[Exception], ...] = (NetworkError,),
-    on_retry: Optional[Callable] = None
+    on_retry: Optional[Callable] = None,
 ):
     """
     Retry decorator with exponential backoff for async functions.
@@ -26,6 +26,7 @@ def retry(
         exceptions: Exception types to retry on
         on_retry: Optional callback called before each retry
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def wrapper(*args, **kwargs) -> Any:
@@ -57,7 +58,9 @@ def retry(
 
             if last_exception:
                 raise last_exception
+
         return wrapper
+
     return decorator
 
 
@@ -65,11 +68,12 @@ def sync_retry(
     max_retries: int = 3,
     delay: float = 1.0,
     backoff: float = 2.0,
-    exceptions: Tuple[Type[Exception], ...] = (Exception,)
+    exceptions: Tuple[Type[Exception], ...] = (Exception,),
 ):
     """
     Synchronous retry decorator with exponential backoff.
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
@@ -93,5 +97,7 @@ def sync_retry(
                         raise
             if last_exception:
                 raise last_exception
+
         return wrapper
+
     return decorator

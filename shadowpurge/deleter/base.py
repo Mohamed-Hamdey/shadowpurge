@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from playwright.sync_api import Page, sync_playwright
 from shadowpurge.core.verification import VerificationModule
 
+
 class BaseAutomatedDeleter(ABC):
     def __init__(self, page: Page, platform_name: str):
         self.page = page
@@ -29,4 +30,3 @@ class BaseAutomatedDeleter(ABC):
     def click_element(self, selector: str):
         self.page.wait_for_selector(selector)
         self.page.click(selector)
-

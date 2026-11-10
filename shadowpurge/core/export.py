@@ -15,6 +15,7 @@ from shadowpurge.core.config import get_settings
 @dataclass
 class ExportOptions:
     """Options for export."""
+
     format: str = "json"  # json, csv, html, markdown
     output_path: Optional[str] = None
     include_timestamps: bool = True
@@ -50,7 +51,9 @@ class Exporter:
         }
         return extensions.get(format.lower(), ".json")
 
-    def export(self, data: Dict[str, Any], base_name: str = "shadowpurge_report") -> Path:
+    def export(
+        self, data: Dict[str, Any], base_name: str = "shadowpurge_report"
+    ) -> Path:
         """Export data to file based on format."""
         output_path = self._get_output_path()
 
@@ -74,7 +77,9 @@ class Exporter:
                 "tool": "ShadowPurge",
                 "version": get_settings().version,
             }
-        path.write_text(json.dumps(output_data, indent=2, ensure_ascii=False), encoding="utf-8")
+        path.write_text(
+            json.dumps(output_data, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
         return path
 
     def _normalize_platform(self, platform: Dict[str, Any]) -> Dict[str, Any]:
@@ -86,8 +91,11 @@ class Exporter:
             "platform": platform.get("platform") or platform.get("name", ""),
             "domain": platform.get("domain", ""),
             "category": platform.get("category", "Unknown"),
-            "confidence": platform.get("confidence", 1.0 if platform.get("found") else 0.0),
-            "profile_urls": platform.get("profile_urls") or ([platform.get("url", "")] if platform.get("url") else []),
+            "confidence": platform.get(
+                "confidence", 1.0 if platform.get("found") else 0.0
+            ),
+            "profile_urls": platform.get("profile_urls")
+            or ([platform.get("url", "")] if platform.get("url") else []),
             "deletion_url": platform.get("deletion_url", ""),
             "removal_instructions": platform.get("removal_instructions", ""),
             "automation_supported": platform.get("automation_supported", False),
@@ -98,6 +106,7 @@ class Exporter:
         if not normalized["domain"] and normalized["profile_urls"]:
             try:
                 from urllib.parse import urlparse
+
                 parsed = urllib.parse.urlparse(normalized["profile_urls"][0])
                 normalized["domain"] = parsed.netloc.lower()
                 if normalized["domain"].startswith("www."):
@@ -114,13 +123,31 @@ class Exporter:
             # Write empty CSV with headers
             with path.open("w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
-                writer.writerow(["platform", "domain", "category", "confidence", "profile_urls", "deletion_url", "automation_supported"])
+                writer.writerow(
+                    [
+                        "platform",
+                        "domain",
+                        "category",
+                        "confidence",
+                        "profile_urls",
+                        "deletion_url",
+                        "automation_supported",
+                    ]
+                )
             return path
 
         with path.open("w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             # Header
-            headers = ["platform", "domain", "category", "confidence", "profile_urls", "deletion_url", "automation_supported"]
+            headers = [
+                "platform",
+                "domain",
+                "category",
+                "confidence",
+                "profile_urls",
+                "deletion_url",
+                "automation_supported",
+            ]
             if self.options.include_snippets:
                 headers.append("search_snippets")
             writer.writerow(headers)
@@ -266,12 +293,21 @@ class Exporter:
                 cat_class = category_classes.get(category, "category-unknown")
                 confidence = norm["confidence"]
                 urls = norm["profile_urls"]
-                urls_display = "<br>".join([f'<a href="{u}" target="_blank" class="urls">{u}</a>' for u in urls[:3]])
+                urls_display = "<br>".join(
+                    [
+                        f'<a href="{u}" target="_blank" class="urls">{u}</a>'
+                        for u in urls[:3]
+                    ]
+                )
                 if len(urls) > 3:
                     urls_display += f"<br><small>+{len(urls) - 3} more...</small>"
 
                 deletion_url = norm["deletion_url"]
-                deletion_display = f'<a href="{deletion_url}" target="_blank" class="urls">🔗 Delete</a>' if deletion_url else "N/A"
+                deletion_display = (
+                    f'<a href="{deletion_url}" target="_blank" class="urls">🔗 Delete</a>'
+                    if deletion_url
+                    else "N/A"
+                )
                 auto = "✅ Yes" if norm["automation_supported"] else "❌ No"
 
                 html += f"""
@@ -354,10 +390,12 @@ class Exporter:
         if not data.get("discovered_platforms"):
             lines.append("No platforms discovered for this target.")
         else:
-            lines.extend([
-                f"| # | Platform | Category | Confidence | Profile URLs | Deletion URL | Automation |",
-                f"|---|---|---|---|---|---|---|",
-            ])
+            lines.extend(
+                [
+                    f"| # | Platform | Category | Confidence | Profile URLs | Deletion URL | Automation |",
+                    f"|---|---|---|---|---|---|---|",
+                ]
+            )
             for idx, platform in enumerate(data.get("discovered_platforms", []), 1):
                 norm = self._normalize_platform(platform)
                 urls = norm["profile_urls"]
@@ -366,10 +404,14 @@ class Exporter:
                     urls_str += f" ... (+{len(urls) - 3} more)"
                 deletion = norm["deletion_url"] or "N/A"
                 auto = "[YES]" if norm["automation_supported"] else "[NO]"
-                lines.append(f"| {idx} | {norm['platform']} | {norm['category']} | {norm['confidence']:.0%} | {urls_str} | {deletion} | {auto} |")
+                lines.append(
+                    f"| {idx} | {norm['platform']} | {norm['category']} | {norm['confidence']:.0%} | {urls_str} | {deletion} | {auto} |"
+                )
 
-        version = __import__('shadowpurge.core.config').core.config.get_settings().version
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        version = (
+            __import__("shadowpurge.core.config").core.config.get_settings().version
+        )
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         footer_lines = [
             "",
             "---",
@@ -389,7 +431,7 @@ def export_results(
     output_path: Optional[str] = None,
     include_timestamps: bool = True,
     include_snippets: bool = True,
-    base_name: str = "shadowpurge_report"
+    base_name: str = "shadowpurge_report",
 ) -> Path:
     """Convenience function to export results."""
     options = ExportOptions(

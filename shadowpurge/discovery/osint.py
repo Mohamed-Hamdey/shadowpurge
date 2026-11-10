@@ -27,7 +27,9 @@ class OSINTScanner:
         self._cache: Dict[str, List[Dict[str, Any]]] = {}
 
     @retry(max_retries=3, delay=1.5, backoff=2.0)
-    async def _hibp_request(self, client: httpx.AsyncClient, endpoint: str) -> List[Dict[str, Any]]:
+    async def _hibp_request(
+        self, client: httpx.AsyncClient, endpoint: str
+    ) -> List[Dict[str, Any]]:
         """Make a rate-limited request to HaveIBeenPwned API."""
         await self.rate_limiter.acquire("haveibeenpwned")
 
@@ -64,29 +66,30 @@ class OSINTScanner:
         async with httpx.AsyncClient() as client:
             try:
                 breaches = await self._hibp_request(
-                    client,
-                    f"/breachedaccount/{email.lower()}"
+                    client, f"/breachedaccount/{email.lower()}"
                 )
 
                 # Transform HIBP response to our standard format
                 results = []
                 for breach in breaches:
-                    results.append({
-                        "source": "HaveIBeenPwned",
-                        "domain": breach.get("Domain", "unknown"),
-                        "breach_name": breach.get("Name", "Unknown Breach"),
-                        "breach_date": breach.get("BreachDate", "Unknown"),
-                        "exposed_data": breach.get("DataClasses", []),
-                        "description": breach.get("Description", ""),
-                        "is_verified": breach.get("IsVerified", False),
-                        "is_fabricated": breach.get("IsFabricated", False),
-                        "is_sensitive": breach.get("IsSensitive", False),
-                        "is_retired": breach.get("IsRetired", False),
-                        "is_spam_list": breach.get("IsSpamList", False),
-                        "logo_path": breach.get("LogoPath", ""),
-                        "pwn_count": breach.get("PwnCount", 0),
-                        "category": "Breach Record"
-                    })
+                    results.append(
+                        {
+                            "source": "HaveIBeenPwned",
+                            "domain": breach.get("Domain", "unknown"),
+                            "breach_name": breach.get("Name", "Unknown Breach"),
+                            "breach_date": breach.get("BreachDate", "Unknown"),
+                            "exposed_data": breach.get("DataClasses", []),
+                            "description": breach.get("Description", ""),
+                            "is_verified": breach.get("IsVerified", False),
+                            "is_fabricated": breach.get("IsFabricated", False),
+                            "is_sensitive": breach.get("IsSensitive", False),
+                            "is_retired": breach.get("IsRetired", False),
+                            "is_spam_list": breach.get("IsSpamList", False),
+                            "logo_path": breach.get("LogoPath", ""),
+                            "pwn_count": breach.get("PwnCount", 0),
+                            "category": "Breach Record",
+                        }
+                    )
 
                 self._cache[f"breach:{email.lower()}"] = results
                 return results
@@ -107,21 +110,22 @@ class OSINTScanner:
         async with httpx.AsyncClient() as client:
             try:
                 pastes = await self._hibp_request(
-                    client,
-                    f"/pasteaccount/{email.lower()}"
+                    client, f"/pasteaccount/{email.lower()}"
                 )
 
                 results = []
                 for paste in pastes:
-                    results.append({
-                        "source": "HaveIBeenPwned Paste",
-                        "source_id": paste.get("Id", ""),
-                        "source_url": paste.get("Source", ""),
-                        "title": paste.get("Title", ""),
-                        "date": paste.get("Date", ""),
-                        "email_count": paste.get("EmailCount", 0),
-                        "category": "Paste Record"
-                    })
+                    results.append(
+                        {
+                            "source": "HaveIBeenPwned Paste",
+                            "source_id": paste.get("Id", ""),
+                            "source_url": paste.get("Source", ""),
+                            "title": paste.get("Title", ""),
+                            "date": paste.get("Date", ""),
+                            "email_count": paste.get("EmailCount", 0),
+                            "category": "Paste Record",
+                        }
+                    )
 
                 self._cache[f"paste:{email.lower()}"] = results
                 return results
@@ -141,7 +145,9 @@ class OSINTScanner:
         # Future integration: Truecaller, Whitepages, Sync.me, Numverify, etc.
         return []
 
-    async def check_username_on_haveibeenpwned(self, username: str) -> List[Dict[str, Any]]:
+    async def check_username_on_haveibeenpwned(
+        self, username: str
+    ) -> List[Dict[str, Any]]:
         """
         Check if a username appears in breaches (some breaches include usernames).
         """
@@ -159,17 +165,22 @@ class OSINTScanner:
                 for breach in all_breaches:
                     data_classes = breach.get("DataClasses", [])
                     # Check if username is a potential data class in this breach
-                    if any("username" in dc.lower() or "user" in dc.lower() for dc in data_classes):
-                        results.append({
-                            "source": "HaveIBeenPwned",
-                            "domain": breach.get("Domain", "unknown"),
-                            "breach_name": breach.get("Name", "Unknown Breach"),
-                            "breach_date": breach.get("BreachDate", "Unknown"),
-                            "exposed_data": data_classes,
-                            "description": breach.get("Description", ""),
-                            "pwn_count": breach.get("PwnCount", 0),
-                            "category": "Potential Username Breach"
-                        })
+                    if any(
+                        "username" in dc.lower() or "user" in dc.lower()
+                        for dc in data_classes
+                    ):
+                        results.append(
+                            {
+                                "source": "HaveIBeenPwned",
+                                "domain": breach.get("Domain", "unknown"),
+                                "breach_name": breach.get("Name", "Unknown Breach"),
+                                "breach_date": breach.get("BreachDate", "Unknown"),
+                                "exposed_data": data_classes,
+                                "description": breach.get("Description", ""),
+                                "pwn_count": breach.get("PwnCount", 0),
+                                "category": "Potential Username Breach",
+                            }
+                        )
 
                 self._cache[f"username:{username.lower()}"] = results
                 return results

@@ -3,12 +3,17 @@ from rich.console import Console
 
 console = Console()
 
+
 class VerificationModule:
     @staticmethod
     def prompt_for_code(platform_name: str) -> str:
         """Prompt the user for a verification code sent to their email/phone."""
-        console.print(f"[bold cyan]Verification required for {platform_name}[/bold cyan]")
-        console.print(f"[yellow]Please check your email or phone for the verification code sent by {platform_name}.[/yellow]")
+        console.print(
+            f"[bold cyan]Verification required for {platform_name}[/bold cyan]"
+        )
+        console.print(
+            f"[yellow]Please check your email or phone for the verification code sent by {platform_name}.[/yellow]"
+        )
         code = questionary.text("Enter the verification code:").ask()
         return code
 

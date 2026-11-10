@@ -1,12 +1,15 @@
 from shadowpurge.deleter.base import BaseAutomatedDeleter
 
+
 class InstagramDeleter(BaseAutomatedDeleter):
     def delete_account(self) -> bool:
         """
         Automated deletion flow for Instagram accounts.
         Instagram has a permanent deletion form.
         """
-        self.navigate_to_settings("https://www.instagram.com/accounts/remove/request/permanent/")
+        self.navigate_to_settings(
+            "https://www.instagram.com/accounts/remove/request/permanent/"
+        )
 
         # Wait for deletion form to load
         self.page.wait_for_selector("input[name='email']", timeout=5000)
@@ -27,10 +30,14 @@ class InstagramDeleter(BaseAutomatedDeleter):
 
     def prepare_deletion(self):
         """Prepare Instagram account for deletion by checking requirements."""
-        self.navigate_to_settings("https://www.instagram.com/accounts/remove/request/permanent/")
+        self.navigate_to_settings(
+            "https://www.instagram.com/accounts/remove/request/permanent/"
+        )
 
         # Check if account is eligible for deletion
-        eligibility_message = self.page.locator("text=This account is not eligible for deletion")
+        eligibility_message = self.page.locator(
+            "text=This account is not eligible for deletion"
+        )
         if eligibility_message.count() > 0:
             return False
 

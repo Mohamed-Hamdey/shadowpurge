@@ -79,6 +79,5 @@ class AdaptiveRateLimiter:
         """Gradually restore rate limit on successful requests."""
         if self.backoff_multiplier[platform] > 1.0:
             self.backoff_multiplier[platform] = max(
-                1.0,
-                self.backoff_multiplier[platform] * 0.9
+                1.0, self.backoff_multiplier[platform] * 0.9
             )

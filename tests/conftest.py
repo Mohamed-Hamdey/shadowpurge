@@ -12,7 +12,7 @@ def mock_platforms():
             "category": "Social",
             "deletion_url": "https://test.com/delete",
             "removal_instructions": "Go to settings and click delete",
-            "automation_supported": True
+            "automation_supported": True,
         },
         {
             "name": "AnotherPlatform",
@@ -20,8 +20,8 @@ def mock_platforms():
             "category": "Developer",
             "deletion_url": "https://another.com/settings/delete",
             "removal_instructions": "Contact support",
-            "automation_supported": False
-        }
+            "automation_supported": False,
+        },
     ]
 
 

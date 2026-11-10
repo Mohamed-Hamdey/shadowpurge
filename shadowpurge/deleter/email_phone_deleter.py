@@ -1,5 +1,6 @@
 from shadowpurge.deleter.base import BaseAutomatedDeleter
 
+
 class EmailPhoneDeleter(BaseAutomatedDeleter):
     def __init__(self, page):
         super().__init__(page)
@@ -14,7 +15,7 @@ class EmailPhoneDeleter(BaseAutomatedDeleter):
             "instagram": "https://www.instagram.com/accounts/remove/request/permanent/",
             "reddit": "https://www.reddit.com/settings/account",
             "twitch": "https://www.twitch.tv/settings/delete",
-            "spotify": "https://www.spotify.com/account/settings"
+            "spotify": "https://www.spotify.com/account/settings",
         }
 
     def delete_email_service(self, service: str):
@@ -57,7 +58,9 @@ class EmailPhoneDeleter(BaseAutomatedDeleter):
     def _delete_gmail(self):
         """Handle Gmail account deletion."""
         # Look for "Delete your Google Account" button
-        delete_button = self.page.get_by_role("button", name="Delete your Google Account")
+        delete_button = self.page.get_by_role(
+            "button", name="Delete your Google Account"
+        )
         if delete_button.count() > 0:
             delete_button.click()
             self.page.wait_for_selector("text=Step 1 - Delete your Google Account")
@@ -105,7 +108,9 @@ class EmailPhoneDeleter(BaseAutomatedDeleter):
         deactivate_button = self.page.get_by_role("button", name="Deactivate")
         if deactivate_button.count() > 0:
             deactivate_button.click()
-            self.page.wait_for_selector("text=Are you sure you want to deactivate your Twitter account?")
+            self.page.wait_for_selector(
+                "text=Are you sure you want to deactivate your Twitter account?"
+            )
 
     def _delete_linkedin(self):
         """Handle LinkedIn account deletion."""
@@ -149,7 +154,9 @@ class EmailPhoneDeleter(BaseAutomatedDeleter):
         delete_button = self.page.get_by_role("button", name="Delete account")
         if delete_button.count() > 0:
             delete_button.click()
-            self.page.wait_for_selector("text=Are you sure you want to delete your account?")
+            self.page.wait_for_selector(
+                "text=Are you sure you want to delete your account?"
+            )
 
     def get_available_services(self) -> List[str]:
         """Return list of email/phone services that can be deleted."""

@@ -1,5 +1,6 @@
 from shadowpurge.deleter.base import BaseAutomatedDeleter
 
+
 class RedditDeleter(BaseAutomatedDeleter):
     def delete_account(self) -> bool:
         """
@@ -29,7 +30,9 @@ class RedditDeleter(BaseAutomatedDeleter):
         """Prepare the account for deletion by checking eligibility."""
         self.navigate_to_settings("https://www.reddit.com/settings/account")
         # Check for deletion eligibility message
-        eligibility_text = self.page.locator("text=Your account is not eligible for deletion")
+        eligibility_text = self.page.locator(
+            "text=Your account is not eligible for deletion"
+        )
         if eligibility_text.count() > 0:
             return False
         return True

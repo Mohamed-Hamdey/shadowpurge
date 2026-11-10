@@ -1,5 +1,6 @@
 from shadowpurge.deleter.base import BaseAutomatedDeleter
 
+
 class GitHubDeleter(BaseAutomatedDeleter):
     def delete_account(self) -> bool:
         """
