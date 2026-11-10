@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  shadowpurge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: shadowpurge:latest
+    container_name: shadowpurge
+    environment:
+      - SHADOWPURGE_DATA_DIR=/app/data
+      - SHADOWPURGE_OUTPUT_EXPORT_DIR=/app/exports
+      - SHADOWPURGE_CACHE_DIR=/app/cache
+      - SHADOWPURGE_LOG_FILE=/app/logs/shadowpurge.log
+      - SHADOWPURGE_LOG_LEVEL=INFO
+      # Search API keys (set in .env file)
+      - SERPAPI_KEY=${SERPAPI_KEY:-}
+      - GOOGLE_CSE_KEY=${GOOGLE_CSE_KEY:-}
+      - GOOGLE_CSE_CX=${GOOGLE_CSE_CX:-}
+      - BING_API_KEY=${BING_API_KEY:-}
+    volumes:
+      - ./data:/app/data
+      - ./exports:/app/exports
+      - ./cache:/app/cache
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    # For interactive use, run with: docker-compose run --rm shadowpurge <command>
+    # For background service: docker-compose up -d
+
+  # Development service with live reload
+  shadowpurge-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: shadowpurge:dev
+    container_name: shadowpurge-dev
+    environment:
+      - SHADOWPURGE_DATA_DIR=/app/data
+      - SHADOWPURGE_OUTPUT_EXPORT_DIR=/app/exports
+      - SHADOWPURGE_CACHE_DIR=/app/cache
+      - SHADOWPURGE_LOG_FILE=/app/logs/shadowpurge.log
+      - SHADOWPURGE_LOG_LEVEL=DEBUG
+      - SHADOWPURGE_DEBUG=true
+      - SERPAPI_KEY=${SERPAPI_KEY:-}
+      - GOOGLE_CSE_KEY=${GOOGLE_CSE_KEY:-}
+      - GOOGLE_CSE_CX=${GOOGLE_CSE_CX:-}
+      - BING_API_KEY=${BING_API_KEY:-}
+    volumes:
+      - ./data:/app/data
+      - ./exports:/app/exports
+      - ./cache:/app/cache
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+      - ./shadowpurge:/app/shadowpurge:ro  # Mount source for live reload
+    stdin_open: true
+    tty: true
+    command: tail -f /dev/null  # Keep container running for exec
+
+# Development with live code changes
+# docker-compose -f docker-compose.yml up shadowpurge-dev
+# docker-compose exec shadowpurge-dev python -m shadowpurge <args>

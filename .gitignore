@@ -1,0 +1,188 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.Python3
+.Python336
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+[Dd]esktop.ini
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+*.swp
+
+# Package manager
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Data files
+*.json
+*.csv
+*.xlsx
+*.md
+*.txt
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+pyenv
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Linting
+.lint
+
+# Test files
+pytest.ini
+test_*.py
+
+# Coverage
+.coverage
+htmlcov/
+
+# Venv
+env
+.venv
+
+# PyCharm
+.idea/
+
+# VSCode
+.vscode/
+
+# Temporary
+.tmp
+
+# Log files
+*.log
+
+# OS Generated Files
+.DS_Store
+
+# Directory for virtual environments
+.venv/
+
+# Pipenv
+Pipfile.lock
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Profiling
+.prof
+
+# IPython
+profile_default/
+ipython_config.py
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.xml
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Temporary backup files
+*~
